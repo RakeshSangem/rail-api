@@ -1,32 +1,18 @@
 import { Hono } from "hono";
-import { or, ilike } from "drizzle-orm";
-import { db } from "./db";
-import { stations } from "./db/schema";
+import { logger } from "hono/logger";
+import stationsRoutes from "./routes/stations";
+import trainsRoutes from "./routes/trains";
 
 const app = new Hono();
+
+app.use(logger());
 
 app.get("/", (c) => {
   return c.json({ message: "Hello Hono!" });
 });
 
-app.get("/stations", async (c) => {
-  const q = c.req.query("q")?.trim();
-  const pattern = q ? `%${q}%` : null;
-
-  const rows = await db
-    .select()
-    .from(stations)
-    .where(
-      pattern
-        ? or(
-            ilike(stations.name, pattern),
-            ilike(stations.code, pattern),
-            ilike(stations.city, pattern),
-          )
-        : undefined,
-    );
-  return c.json(rows);
-});
+app.route("/stations", stationsRoutes);
+app.route("/trains", trainsRoutes);
 
 export default {
   port: 3000,
