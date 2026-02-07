@@ -1,0 +1,39 @@
+# deps
+node_modules/
+
+# env & secrets
+.env
+.env.local
+.env.*.local
+
+# Bun
+dist/
+*.lockb
+
+# Drizzle (optional: uncomment if you use db push only and don't commit migrations)
+# drizzle/*.sql
+
+# build / output
+build/
+.output/
+out/
+
+# logs
+*.log
+npm-debug.log*
+bun-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE (optional: remove if your team commits these)
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# coverage & cache
+coverage/
+.cache/
+.turbo/

@@ -1,0 +1,21 @@
+{
+  "name": "rail-api",
+  "scripts": {
+    "dev": "bun run --hot src/index.ts",
+    "db:generate": "drizzle-kit generate",
+    "db:push": "drizzle-kit push",
+    "db:studio": "drizzle-kit studio"
+  },
+  "dependencies": {
+    "csv-parse": "^6.1.0",
+    "drizzle-orm": "^0.38.3",
+    "hono": "^4.11.8",
+    "pg": "^8.18.0",
+    "zod": "^4.3.6"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "@types/pg": "^8.16.0",
+    "drizzle-kit": "^0.30.1"
+  }
+}
