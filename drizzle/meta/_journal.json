@@ -15,6 +15,27 @@
       "when": 1770481007124,
       "tag": "0001_smooth_dorian_gray",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1770488433934,
+      "tag": "0002_worthless_hex",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1770488477549,
+      "tag": "0003_giant_molten_man",
+      "breakpoints": true
+    },
+    {
+      "idx": 4,
+      "version": "7",
+      "when": 1770488702401,
+      "tag": "0004_slow_frank_castle",
+      "breakpoints": true
     }
   ]
 }
