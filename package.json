@@ -7,6 +7,7 @@
     "db:studio": "drizzle-kit studio"
   },
   "dependencies": {
+    "@hono/zod-validator": "^0.7.6",
     "csv-parse": "^6.1.0",
     "drizzle-orm": "^0.38.3",
     "hono": "^4.11.8",

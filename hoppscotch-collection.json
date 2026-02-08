@@ -1,0 +1,304 @@
+{
+  "v": 2,
+  "name": "Railway API",
+  "description": "Indian Railway API for searching trains, stations, routes, coaches, and fares",
+  "auth": {
+    "authType": "none",
+    "authActive": false
+  },
+  "folders": [
+    {
+      "v": 2,
+      "name": "Stations",
+      "folders": [],
+      "requests": [
+        {
+          "v": "1",
+          "name": "List Stations",
+          "method": "GET",
+          "endpoint": "<<base_url>>/stations",
+          "params": [
+            {
+              "key": "page",
+              "value": "1",
+              "active": true,
+              "description": "Page number (default: 1)"
+            },
+            {
+              "key": "limit",
+              "value": "20",
+              "active": true,
+              "description": "Items per page (default: 20, max: 50)"
+            },
+            {
+              "key": "q",
+              "value": "",
+              "active": false,
+              "description": "Search query (optional)"
+            }
+          ],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        },
+        {
+          "v": "1",
+          "name": "Search Stations",
+          "method": "GET",
+          "endpoint": "<<base_url>>/stations/search",
+          "params": [
+            {
+              "key": "q",
+              "value": "mumbai",
+              "active": true,
+              "description": "Search term for station name or code"
+            }
+          ],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        },
+        {
+          "v": "1",
+          "name": "Get Station by Code",
+          "method": "GET",
+          "endpoint": "<<base_url>>/stations/code/CSMT",
+          "params": [],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        },
+        {
+          "v": "1",
+          "name": "Get Trains at Station",
+          "method": "GET",
+          "endpoint": "<<base_url>>/stations/CSMT/trains",
+          "params": [],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        },
+        {
+          "v": "1",
+          "name": "Get Station Stats",
+          "method": "GET",
+          "endpoint": "<<base_url>>/stations/CSMT/stats",
+          "params": [],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        }
+      ]
+    },
+    {
+      "v": 2,
+      "name": "Trains",
+      "folders": [],
+      "requests": [
+        {
+          "v": "1",
+          "name": "List Trains",
+          "method": "GET",
+          "endpoint": "<<base_url>>/trains",
+          "params": [
+            {
+              "key": "page",
+              "value": "1",
+              "active": true,
+              "description": "Page number (default: 1)"
+            },
+            {
+              "key": "limit",
+              "value": "20",
+              "active": true,
+              "description": "Items per page (default: 20, max: 50)"
+            },
+            {
+              "key": "q",
+              "value": "",
+              "active": false,
+              "description": "Search query for train name or number (optional)"
+            }
+          ],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        },
+        {
+          "v": "1",
+          "name": "Search Trains Between Stations",
+          "method": "GET",
+          "endpoint": "<<base_url>>/trains/search",
+          "params": [
+            {
+              "key": "from",
+              "value": "CSMT",
+              "active": true,
+              "description": "Source station code (required)"
+            },
+            {
+              "key": "to",
+              "value": "PUNE",
+              "active": true,
+              "description": "Destination station code (required)"
+            },
+            {
+              "key": "page",
+              "value": "1",
+              "active": true,
+              "description": "Page number (default: 1)"
+            },
+            {
+              "key": "limit",
+              "value": "20",
+              "active": true,
+              "description": "Items per page (default: 20, max: 50)"
+            }
+          ],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        },
+        {
+          "v": "1",
+          "name": "Get Train by Number",
+          "method": "GET",
+          "endpoint": "<<base_url>>/trains/22105",
+          "params": [],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        },
+        {
+          "v": "1",
+          "name": "Get Train Routes",
+          "method": "GET",
+          "endpoint": "<<base_url>>/trains/22105/routes",
+          "params": [],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        }
+      ]
+    },
+    {
+      "v": 2,
+      "name": "Coaches",
+      "folders": [],
+      "requests": [
+        {
+          "v": "1",
+          "name": "Get Coaches by Train",
+          "method": "GET",
+          "endpoint": "<<base_url>>/coaches/train/22105",
+          "params": [],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        }
+      ]
+    },
+    {
+      "v": 2,
+      "name": "Fares",
+      "folders": [],
+      "requests": [
+        {
+          "v": "1",
+          "name": "Get Fares by Train",
+          "method": "GET",
+          "endpoint": "<<base_url>>/fares/train/22105",
+          "params": [],
+          "headers": [],
+          "auth": {
+            "authType": "none",
+            "authActive": false
+          },
+          "body": {
+            "contentType": null,
+            "body": null
+          }
+        }
+      ]
+    }
+  ],
+  "requests": [
+    {
+      "v": "1",
+      "name": "Health Check",
+      "method": "GET",
+      "endpoint": "<<base_url>>/",
+      "params": [],
+      "headers": [],
+      "auth": {
+        "authType": "none",
+        "authActive": false
+      },
+      "body": {
+        "contentType": null,
+        "body": null
+      }
+    }
+  ],
+  "headers": []
+}

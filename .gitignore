@@ -6,6 +6,8 @@ node_modules/
 .env.local
 .env.*.local
 
+*.csv
+
 # Bun
 dist/
 *.lockb
@@ -37,3 +39,5 @@ Thumbs.db
 coverage/
 .cache/
 .turbo/
+
+.vercel

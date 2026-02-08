@@ -36,6 +36,27 @@
       "when": 1770488702401,
       "tag": "0004_slow_frank_castle",
       "breakpoints": true
+    },
+    {
+      "idx": 5,
+      "version": "7",
+      "when": 1770517116497,
+      "tag": "0005_quick_shape",
+      "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1770517200800,
+      "tag": "0006_hard_jean_grey",
+      "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1770521383542,
+      "tag": "0007_tearful_sinister_six",
+      "breakpoints": true
     }
   ]
 }
