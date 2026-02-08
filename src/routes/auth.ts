@@ -1,6 +1,7 @@
 import { Hono } from "hono";
 import { eq } from "drizzle-orm";
 import { sign } from "hono/jwt";
+import { hash, compare } from "bcryptjs";
 import { db } from "../db";
 import { users } from "../db/schema";
 import { env } from "../../env";
@@ -16,7 +17,7 @@ app.post("/login", async (c) => {
     return c.json({ error: "Invalid credentials" }, 401);
   }
 
-  const isValid = await Bun.password.verify(password, user.passwordHash);
+  const isValid = await compare(password, user.passwordHash);
   if (!isValid) {
     return c.json({ error: "Invalid credentials" }, 401);
   }
@@ -47,10 +48,7 @@ app.post("/register", async (c) => {
     return c.json({ error: "User already exists" }, 409);
   }
 
-  const hashedPassword = await Bun.password.hash(password, {
-    algorithm: "bcrypt",
-    cost: 10,
-  });
+  const hashedPassword = await hash(password, 10);
 
   const result = await db
     .insert(users)

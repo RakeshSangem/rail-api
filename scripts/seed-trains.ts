@@ -2,18 +2,28 @@ import * as fs from "fs";
 import { parse } from "csv-parse/sync";
 import { db } from "../src/db";
 import { trains } from "../src/db/schema/trains";
+import { trainRoutes } from "../src/db/schema/train-routes";
+import { trainCoaches } from "../src/db/schema/train-coaches";
+import { trainFares } from "../src/db/schema/train-fares";
 
-const CSV_FILE_PATH = "train_routes.csv";
+const CSV_FILE_PATH = "trains-parsed.csv";
 
 type CsvRow = {
-  train_no: string;
-  seq: string;
-  code: string;
-  station: string;
-  arr: string;
-  dep: string;
-  dist: string;
-  day: string;
+  no: string;
+  name: string;
+  type: string;
+  zone: string;
+  source: string;
+  destination: string;
+  departure: string;
+  arrival: string;
+  duration: string;
+  halts: string;
+  distance: string;
+  speed: string;
+  return: string;
+  classes: string;
+  days: string;
 };
 
 const csvText = fs.readFileSync(CSV_FILE_PATH, "utf-8");
@@ -23,150 +33,102 @@ const rows = parse(csvText, {
   trim: true,
 }) as CsvRow[];
 
+// Convert days format from SMTWTFS to 1111111 format
+const convertDaysFormat = (days: string): string => {
+  if (!days || days.length !== 7) return "1111111";
+  return days
+    .split("")
+    .map((d) => (d !== "-" ? "1" : "0"))
+    .join("");
+};
+
 // Valid time format: HH:MM
 const isValidTime = (time: string): boolean => {
   return /^[0-9]{2}:[0-9]{2}$/.test(time);
 };
 
-// Group rows by train_no to extract train info
-const trainMap = new Map<
-  string,
-  {
-    trainNo: string;
-    source: string;
-    destination: string;
-    departureTime: string | null;
-    arrivalTime: string | null;
-    distanceKm: number | null;
-  }
->();
+// Clean train number - take only first 6 chars, remove suffixes like "-Slip"
+const cleanTrainNo = (no: string): string | null => {
+  if (!no) return null;
+  const cleaned = no.toString().trim().split('-')[0];
+  return cleaned.length <= 6 ? cleaned : null;
+};
 
+// Clean string - convert empty strings to null
+const cleanString = (str: string | null | undefined, maxLength?: number): string | null => {
+  if (!str) return null;
+  const trimmed = str.toString().trim();
+  if (!trimmed) return null;
+  if (maxLength && trimmed.length > maxLength) {
+    return trimmed.substring(0, maxLength);
+  }
+  return trimmed;
+};
+
+// Deduplicate by trainNo - keep first occurrence
+const uniqueRows = new Map<string, CsvRow & { trainNo: string }>();
 rows.forEach((r) => {
-  const trainNo = r.train_no?.trim();
-  const seq = parseInt(r.seq, 10);
-  const code = r.code?.trim();
-  const arr = r.arr?.trim();
-  const dep = r.dep?.trim();
-  const dist = r.dist ? parseInt(r.dist, 10) : null;
-
-  if (!trainNo || !code) return;
-
-  if (!trainMap.has(trainNo)) {
-    trainMap.set(trainNo, {
-      trainNo,
-      source: "",
-      destination: "",
-      departureTime: null,
-      arrivalTime: null,
-      distanceKm: null,
-    });
-  }
-
-  const train = trainMap.get(trainNo)!;
-
-  // First station (seq=1 or arr="First")
-  if (seq === 1 || arr === "First") {
-    train.source = code;
-    // Only use valid time format
-    if (isValidTime(dep)) {
-      train.departureTime = dep;
-    }
-  }
-
-  // Last station (dep="Last")
-  if (dep === "Last") {
-    train.destination = code;
-    // Only use valid time format
-    if (isValidTime(arr)) {
-      train.arrivalTime = arr;
-    }
-    if (dist !== null) {
-      train.distanceKm = dist;
-    }
-  }
-
-  // Track max sequence to determine last station if "Last" marker is missing
-  if (!train.destination && seq > 1) {
-    // Check if this might be the last station (no next station for this train)
-    // We'll update destination based on max distance
-    if (dist !== null && dist > (train.distanceKm || 0)) {
-      train.distanceKm = dist;
-    }
+  const trainNo = cleanTrainNo(r.no);
+  if (trainNo && r.source && r.destination && !uniqueRows.has(trainNo)) {
+    uniqueRows.set(trainNo, { ...r, trainNo });
   }
 });
 
-// Second pass: find destinations for trains without "Last" marker
-const trainMaxSeq = new Map<string, number>();
-rows.forEach((r) => {
-  const trainNo = r.train_no?.trim();
-  const seq = parseInt(r.seq, 10);
-  if (trainNo) {
-    const current = trainMaxSeq.get(trainNo) || 0;
-    if (seq > current) {
-      trainMaxSeq.set(trainNo, seq);
-    }
-  }
-});
+console.log(`📊 ${rows.length} CSV rows → ${uniqueRows.size} unique trains after deduplication`);
 
-// Third pass: set destinations for trains missing them
-rows.forEach((r) => {
-  const trainNo = r.train_no?.trim();
-  const seq = parseInt(r.seq, 10);
-  const code = r.code?.trim();
-  const arr = r.arr?.trim();
-  const dist = r.dist ? parseInt(r.dist, 10) : null;
-
-  if (!trainNo || !code) return;
-
-  const train = trainMap.get(trainNo);
-  if (!train) return;
-
-  const maxSeq = trainMaxSeq.get(trainNo) || 0;
-
-  // If this is the last sequence and we don't have a destination yet
-  if (seq === maxSeq && !train.destination) {
-    train.destination = code;
-    if (isValidTime(arr)) {
-      train.arrivalTime = arr;
-    }
-    if (dist !== null) {
-      train.distanceKm = dist;
-    }
-  }
-});
-
-// Convert map to array and ensure source/destination are set
-const values = Array.from(trainMap.values())
-  .filter((t) => t.source && t.destination)
-  .map((t) => ({
-    trainNo: t.trainNo,
-    name: `Train ${t.trainNo}`,
-    type: null,
-    zone: null,
-    source: t.source,
-    destination: t.destination,
-    departureTime: t.departureTime,
-    arrivalTime: t.arrivalTime,
-    durationMinutes: null,
-    distanceKm: t.distanceKm,
-    classes: null,
-    returnTrainNo: null,
-    runsOnDays: "1111111",
+const values = Array.from(uniqueRows.values())
+  .map((r) => ({
+    trainNo: r.trainNo!,
+    name: cleanString(r.name, 255) || `Train ${r.no?.trim() || 'Unknown'}`,
+    type: cleanString(r.type, 50),
+    zone: cleanString(r.zone, 10),
+    source: cleanString(r.source, 5)!,
+    destination: cleanString(r.destination, 5)!,
+    departureTime: isValidTime(r.departure) ? r.departure : null,
+    arrivalTime: isValidTime(r.arrival) ? r.arrival : null,
+    durationMinutes: r.duration ? parseInt(r.duration, 10) : null,
+    distanceKm: r.distance ? parseInt(r.distance, 10) : null,
+    classes: cleanString(r.classes),
+    returnTrainNo: cleanTrainNo(r.return),
+    runsOnDays: convertDaysFormat(r.days),
   }));
 
 async function run() {
   if (values.length === 0) {
-    console.error("❌ No trains to insert. Check train_routes.csv data.");
+    console.error("❌ No trains to insert. Check trains-parsed.csv data.");
     process.exit(1);
   }
 
   console.log(`🚆 Found ${values.length} trains to seed`);
+  console.log("⚠️  This will DELETE ALL existing train data first!");
 
-  await db.insert(trains).values(values).onConflictDoNothing({
-    target: trains.trainNo,
-  });
+  // Delete child records first (due to foreign key constraints)
+  console.log("🗑️  Deleting train routes...");
+  await db.delete(trainRoutes);
+  
+  console.log("🗑️  Deleting train coaches...");
+  await db.delete(trainCoaches);
+  
+  console.log("🗑️  Deleting train fares...");
+  await db.delete(trainFares);
+  
+  console.log("🗑️  Deleting trains...");
+  await db.delete(trains);
 
-  console.log(`✅ Inserted ${values.length} trains.`);
+  console.log("✅ All existing data deleted.");
+
+  // Insert new data in batches to avoid overwhelming the DB
+  const BATCH_SIZE = 500;
+  let inserted = 0;
+  
+  for (let i = 0; i < values.length; i += BATCH_SIZE) {
+    const batch = values.slice(i, i + BATCH_SIZE);
+    await db.insert(trains).values(batch);
+    inserted += batch.length;
+    console.log(`📥 Inserted ${inserted}/${values.length} trains...`);
+  }
+
+  console.log(`✅ Successfully inserted ${values.length} trains.`);
   process.exit(0);
 }
 
